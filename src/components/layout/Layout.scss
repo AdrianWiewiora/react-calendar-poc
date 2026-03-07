@@ -1,0 +1,21 @@
+// src/components/layout/Layout.scss
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+// MAIN WRAPPER (Sidebar + Content)
+.main-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden; // Ważne, żeby layout się nie "rozlał"
+}
+
+// CONTENT AREA
+.content-area {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto; // Content może się scrollować
+}
