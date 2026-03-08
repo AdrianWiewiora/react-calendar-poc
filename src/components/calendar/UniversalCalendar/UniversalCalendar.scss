@@ -1,0 +1,191 @@
+.universal-calendar-wrapper {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  .rbc-calendar {
+    flex: 1;
+  }
+
+  // POPRAWIONE: Dokładne doleganie do siatki
+  .rbc-event {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important; // Usuwa ukryte przesunięcia
+    box-sizing: border-box !important; // Wymusza poprawne liczenie pikseli przez kalendarz
+  }
+  .rbc-event-label {
+    display: none !important;
+  }
+}
+
+// WYGLĄD NASZEGO ZAGNIEŻDŻONEGO ZADANIA
+.custom-shift-block {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  color: var(--text-main);
+  border: 1px solid transparent;
+
+  // STYL DLA NORMALNEJ PRACY
+  &.shift-planned {
+    background-color: #f0f7ff;
+    border-color: #cce3ff;
+
+    .shift-header {
+      background-color: #d9ebff;
+      border-bottom: 1px solid #cce3ff;
+    }
+  }
+
+  // STYL DLA NIEOBECNOŚCI (Czerwony motyw)
+  &.shift-absent {
+    background-color: #fff1f1;
+    border-color: #ffdce0;
+    color: #da1e28;
+
+    .shift-header {
+      background-color: #ffe5e8;
+      border-bottom: 1px solid #ffdce0;
+      color: #da1e28;
+    }
+  }
+
+  .shift-header {
+    display: flex;
+    justify-content: space-between; // Tekst do lewej, godziny do prawej
+    align-items: center;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+
+    strong { font-weight: 600; }
+
+    .shift-time-main {
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+  }
+
+  // (Reszta stylów dla .subtasks-container i .subtask-item zostaje bez zmian)
+  .subtasks-container {
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+  }
+  .subtask-item {
+    background-color: white;
+    border-left: 4px solid #ccc;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+
+    .subtask-time {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+  }
+}
+
+// WYGLĄD ZADANIA NA MASZYNIE (Podzadania)
+.custom-task-block {
+  background-color: white;
+  border-left: 4px solid var(--primary-color);
+  padding: 4px 8px;
+  height: 100%;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  color: var(--text-main);
+
+  .task-header { font-weight: 600; font-size: 0.75rem; }
+  .task-time { color: var(--text-muted); font-size: 0.7rem; margin-top: 2px; }
+}
+
+// --- MAGIA WYSZARZONEGO TŁA W TRYBIE PRACY ---
+.universal-calendar-wrapper.task-mode-active {
+  .rbc-time-content {
+    background-color: #f5f7fa;
+  }
+
+  // Zmiany wchodzą w tło i stają się BIAŁE (wycięte okno czasowe do pracy)
+  .rbc-background-event {
+    background-color: #ffffff !important;
+    border-left: 3px solid #bde2b9; // Delikatny zielony pasek z lewej oznaczający otwarcie zmiany
+    border-right: 1px dashed #d1d5db;
+    opacity: 1 !important;
+  }
+}
+
+// Wygląd naszego "czystego" tła zmiany
+.custom-bg-block {
+  height: 100%;
+  width: 100%;
+  background-color: transparent;
+}
+
+.universal-calendar-wrapper.task-mode-active {
+  .rbc-time-content {
+    background-color: #f5f7fa; // Szare "martwe" godziny
+  }
+
+  // 1. ZWYKŁA ZMIANA (Białe okno na pracę)
+  .rbc-background-event.bg-planned-event {
+    background-color: #ffffff !important;
+    border-left: 3px solid #bde2b9;
+    border-right: 1px dashed #d1d5db;
+    opacity: 1 !important;
+    padding: 0 !important;
+    pointer-events: none;
+
+    // Ukrywamy wszystko w środku
+    * { display: none !important; }
+  }
+
+  // 2. NIEOBECNOŚĆ / URLOP (Czerwone, zakreskowane tło z napisem)
+  .rbc-background-event.bg-absent-event {
+    background-color: #fff1f1 !important;
+    border: 1px solid #ffdce0 !important;
+    opacity: 1 !important;
+    pointer-events: none;
+
+    background-image: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(218, 30, 40, 0.05) 10px,
+                    rgba(218, 30, 40, 0.05) 20px
+    ) !important;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    color: #da1e28 !important;
+
+    // --- KLUCZOWA POPRAWKA ---
+    // Ukrywamy godziny i te "dziwne kreski" z Drag & Drop!
+    .rbc-event-label,
+    .rbc-addons-dnd-resize-ns-anchor,
+    .rbc-addons-dnd-resize-ns-icon {
+      display: none !important;
+    }
+
+    // Zostawiamy WYŁĄCZNIE czysty tytuł ("Urlop (UW)")
+    .rbc-event-content {
+      display: block !important;
+      font-weight: 600;
+      font-size: 1rem;
+      text-align: center;
+    }
+  }
+}

@@ -1,0 +1,90 @@
+// src/components/calendar/CustomCalendarToolbar/CustomCalendarToolbar.scss
+
+.custom-calendar-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+
+  // Dodajemy flex: 1, żeby pasek równo dociskał środek
+  .toolbar-left {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .view-switcher {
+    display: flex;
+    background-color: var(--bg-color);
+    border-radius: 6px;
+    padding: 4px;
+
+    button {
+      background: none;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text-main);
+
+      &.active {
+        background-color: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+    }
+  }
+
+  .toolbar-center {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    .toolbar-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      width: 340px; // KLUCZOWE: Stała szerokość blokuje przesuwanie strzałek!
+      text-align: center;
+      text-transform: capitalize;
+    }
+
+    .icon-btn, .today-btn {
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover { background-color: var(--bg-color); }
+    }
+
+    .icon-btn { padding: 4px; }
+    .today-btn { padding: 6px 12px; font-size: 0.85rem; }
+  }
+
+  // Dodajemy flex: 1 dla prawej strony
+  .toolbar-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .filter-placeholders {
+    display: flex;
+    gap: 10px;
+    select {
+      padding: 6px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: white;
+      outline: none;
+    }
+  }
+}

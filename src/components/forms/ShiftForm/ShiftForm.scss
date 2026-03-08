@@ -1,0 +1,79 @@
+.shift-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    input, select {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      outline: none;
+      color: var(--text-main);
+      background-color: white; // <-- Ważne dla selecta
+
+      &:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+      }
+    }
+  }
+
+  .form-row {
+    display: flex;
+    gap: 15px;
+
+    .form-group {
+      flex: 1;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+
+    button {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: 500;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel {
+      background-color: transparent;
+      color: var(--text-muted);
+
+      &:hover {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+      }
+    }
+
+    .btn-submit {
+      background-color: var(--primary-color);
+      color: white;
+
+      &:hover {
+        background-color: #357abd;
+      }
+    }
+  }
+}
