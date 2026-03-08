@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { View, SlotInfo } from 'react-big-calendar';
 import { format } from 'date-fns';
 
@@ -160,33 +160,103 @@ export const MyCalendar = () => {
         setSelectedEvent(null);
     };
 
+// --- LOGIKA DRAG AND DROP (Rozbudowana o Kopiowanie!) ---
     const handleEventDrop = ({ event, start, end }: EventInteractionArgs) => {
+        const isCopy = isCtrlPressed.current; // Sprawdzamy, czy wciśnięto Ctrl w momencie puszczenia
+
         const startDate = start instanceof Date ? start : new Date(start);
         const endDate = end instanceof Date ? end : new Date(end);
-
         const newStart = format(startDate, "yyyy-MM-dd'T'HH:mm:ss");
         const newEnd = format(endDate, "yyyy-MM-dd'T'HH:mm:ss");
 
-        setShifts(prevShifts => prevShifts.map(shift => {
-            if (isTaskMode) {
-                if (shift.subTasks) {
-                    return {
-                        ...shift,
-                        subTasks: shift.subTasks.map(sub => sub.id === event.id ? { ...sub, startTime: newStart, endTime: newEnd } : sub)
+        setShifts(prevShifts => {
+            if (isCopy) {
+                // ==========================================
+                // TRYB KOPIOWANIA (Tworzymy całkiem nowe obiekty)
+                // ==========================================
+                if (isTaskMode) {
+                    return prevShifts.map(shift => {
+                        const shiftStart = new Date(shift.startTime);
+                        const shiftEnd = new Date(shift.endTime);
+                        const taskStart = new Date(newStart);
+                        const taskEnd = new Date(newEnd);
+                        const isSameDay = shiftStart.getDate() === taskStart.getDate() && shiftStart.getMonth() === taskStart.getMonth() && shiftStart.getFullYear() === taskStart.getFullYear();
+
+                        // Znajdujemy zmianę na nowym miejscu i wrzucamy jej KLONA zadania
+                        if (shift.employeeId === 'emp-1' && ((taskStart >= shiftStart && taskEnd <= shiftEnd) || (event.allDay && isSameDay))) {
+                            const newTask = {
+                                id: `sub-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                                title: event.title,
+                                startTime: newStart,
+                                endTime: newEnd,
+                                color: event.color, // Kopiujemy też kolor!
+                                isAllDay: event.allDay
+                            };
+                            return { ...shift, subTasks: [...(shift.subTasks || []), newTask] };
+                        }
+                        return shift;
+                    });
+                } else {
+                    // Kopiowanie Głównej Zmiany
+                    const newShift: WorkShift = {
+                        id: `shift-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                        employeeId: 'emp-1',
+                        title: event.title,
+                        startTime: newStart,
+                        endTime: newEnd,
+                        status: (event.status as 'planned' | 'in-progress' | 'completed' | 'absent') || 'planned',
+                        subTasks: [], // Na razie bezpiecznie nie kopiujemy "wnętrzności" zadania
+                        isAllDay: event.allDay
                     };
+                    return [...prevShifts, newShift];
                 }
             } else {
-                if (shift.id === event.id) {
-                    return { ...shift, startTime: newStart, endTime: newEnd };
-                }
+                // ==========================================
+                // TRYB PRZENOSZENIA (Stara logika, tylko przesunięcie)
+                // ==========================================
+                return prevShifts.map(shift => {
+                    if (isTaskMode) {
+                        if (shift.subTasks) {
+                            return {
+                                ...shift,
+                                subTasks: shift.subTasks.map(sub => sub.id === event.id ? { ...sub, startTime: newStart, endTime: newEnd } : sub)
+                            };
+                        }
+                    } else {
+                        if (shift.id === event.id) {
+                            return { ...shift, startTime: newStart, endTime: newEnd };
+                        }
+                    }
+                    return shift;
+                });
             }
-            return shift;
-        }));
+        });
     };
 
     const handleEventResize = (args: EventInteractionArgs) => {
+        const wasCtrlPressed = isCtrlPressed.current;
+        isCtrlPressed.current = false;
         handleEventDrop(args);
+        isCtrlPressed.current = wasCtrlPressed; // Przywracamy stan na wszelki wypadek
     };
+    const isCtrlPressed = useRef(false);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Control') isCtrlPressed.current = true;
+        };
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === 'Control') isCtrlPressed.current = false;
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, []);
 
     return (
         <div className="my-calendar-page">
