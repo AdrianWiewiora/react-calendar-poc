@@ -1,22 +1,22 @@
 // src/main.tsx
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 
 // Style
 import './index.scss';
 import './components/layout/Layout.scss';
 
-// Komponenty i Strony
 import { Topbar } from './components/layout/Topbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { MyCalendar } from './pages/MyCalendar/MyCalendar.tsx';
 import { TeamSchedule } from './pages/TeamSchedule/TeamSchedule';
 import { Machines } from './pages/Machines/Machines';
+import {RawCalendar} from "./pages/RawCalendar/RawCalendar.tsx";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-        <BrowserRouter>
+        <HashRouter>
             <div className="app-container">
                 <Topbar />
                 <div className="main-wrapper">
@@ -26,10 +26,11 @@ createRoot(document.getElementById('root')!).render(
                             <Route path="/" element={<MyCalendar />} />
                             <Route path="/team" element={<TeamSchedule />} />
                             <Route path="/machines" element={<Machines />} />
+                            <Route path="/raw" element={<RawCalendar />} />
                         </Routes>
                     </main>
                 </div>
             </div>
-        </BrowserRouter>
+        </HashRouter>
     </StrictMode>,
 );

@@ -1,0 +1,217 @@
+.team-schedule-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--surface-color);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 20px;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    h2 { margin: 0; font-size: 1.2rem; color: var(--text-main); }
+
+    .week-navigation {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background-color: var(--bg-color);
+      padding: 4px 8px;
+      border-radius: 6px;
+
+      button {
+        background: none; border: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        padding: 4px; border-radius: 4px; color: var(--text-muted);
+        &:hover { background-color: rgba(0,0,0,0.05); color: var(--text-main); }
+      }
+
+      .current-week { font-weight: 600; font-size: 0.9rem; min-width: 150px; text-align: center;}
+    }
+  }
+
+  .matrix-container {
+    flex: 1;
+    overflow: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+
+    .schedule-matrix {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px; // Żeby się ładnie scrollowało na małych ekranach
+
+      th, td {
+        border: 1px solid var(--border-color);
+        padding: 10px;
+        vertical-align: top;
+      }
+
+      thead {
+        background-color: #f9fafb;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+
+        th {
+          text-align: left;
+          padding: 12px 10px;
+
+          &.employee-col { width: 200px; }
+          &.day-col { width: calc((100% - 200px) / 5); }
+
+          .day-name { text-transform: capitalize; font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
+          .day-date { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+        }
+      }
+
+      tbody {
+        tr {
+          &:hover { background-color: #fcfcfc; }
+        }
+
+        .employee-cell {
+          background-color: white;
+          strong { display: block; color: var(--text-main); font-size: 0.95rem; }
+          .department { display: block; color: var(--text-muted); font-size: 0.75rem; margin-top: 4px; }
+        }
+
+        .shift-cell {
+          background-color: #f5f7fa;
+          padding: 6px;
+          cursor: pointer; // Pokazuje, że można w to kliknąć!
+          transition: background-color 0.2s;
+
+          &.selected-range {
+            background-color: rgba(74, 144, 226, 0.15) !important;
+            box-shadow: inset 0 0 0 2px var(--primary-color);
+            .empty-shift { opacity: 0; } // Ukrywa tekst podczas malowania
+          }
+
+          &:hover {
+            background-color: #eef2f6; // Podświetla komórkę przy najechaniu
+            .empty-shift { color: var(--primary-color); opacity: 1; }
+          }
+
+          .empty-shift {
+            color: #ccc;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 10px 0;
+            opacity: 0; // Ukrywamy napis domyślnie...
+            transition: opacity 0.2s;
+          }
+
+          .shift-block {
+            border-radius: 6px;
+            padding: 8px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+
+            // --- NOWE: Kursor łapki do przeciągania ---
+            cursor: grab;
+            &:active { cursor: grabbing; }
+
+            &.planned {
+              background-color: #ffffff;
+              border: 1px solid #cce3ff;
+              border-left: 4px solid #4a90e2;
+
+              .shift-title { font-weight: 600; color: var(--text-main); font-size: 0.85rem; }
+              .shift-time { color: var(--text-muted); font-size: 0.75rem; }
+            }
+
+            &.absent {
+              background-color: #fff1f1;
+              border: 1px solid #ffdce0;
+              border-left: 4px solid #da1e28;
+              background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(218, 30, 40, 0.03) 5px, rgba(218, 30, 40, 0.03) 10px);
+
+              .shift-title { font-weight: 600; color: #da1e28; font-size: 0.85rem; }
+              .shift-time { color: #da1e28; opacity: 0.8; font-size: 0.75rem; }
+            }
+
+            // Lista podzadań (kropeczki z maszynami)
+            .shift-tasks-preview {
+              margin-top: 6px;
+              display: flex;
+              flex-direction: column;
+              gap: 3px;
+
+              .mini-task {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                font-size: 0.7rem;
+                color: var(--text-main);
+                background-color: #f5f7fa;
+                padding: 2px 4px;
+                border-radius: 3px;
+
+                .color-dot { width: 6px; height: 6px; border-radius: 50%; }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .floating-action-bar {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f2937;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    z-index: 100;
+    animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    span {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .btn-plan {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover { background-color: #357abd; }
+    }
+
+    .btn-cancel {
+      background: transparent;
+      color: #9ca3af;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s;
+
+      &:hover { color: white; }
+    }
+  }
+
+  @keyframes slideUp {
+    from { bottom: -80px; opacity: 0; }
+    to { bottom: 30px; opacity: 1; }
+  }
+}

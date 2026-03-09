@@ -1,7 +1,6 @@
-// src/components/layout/Sidebar.tsx
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom'; // NOWY IMPORT
-import { Calendar as CalendarIcon, Users, Menu, ChevronLeft, Cpu } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Calendar as CalendarIcon, Users, Menu, ChevronLeft, Cpu, Layout } from 'lucide-react';
 import './Sidebar.scss';
 
 export const Sidebar = () => {
@@ -27,6 +26,10 @@ export const Sidebar = () => {
                 <NavLink to="/machines" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <Cpu size={24} className="nav-icon" />
                     <span className="nav-text">Maszyny / Stanowiska</span>
+                </NavLink>
+                <NavLink to="/raw" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                    <Layout size={24} className="nav-icon" />
+                    <span className="nav-text">Surowy Kalendarz</span>
                 </NavLink>
             </nav>
         </aside>

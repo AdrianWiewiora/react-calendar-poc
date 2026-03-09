@@ -1,79 +1,200 @@
-.shift-form {
+.shift-form-wrapper {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  gap: 20px;
+  /* Jeśli Modal jest za wąski, ten min-width wymusi jego poszerzenie */
+  min-width: 550px;
 
-  .form-group {
+  /* ========================================== */
+  /* LEWA STRONA: TWÓJ ORYGINALNY FORMULARZ     */
+  /* ========================================== */
+  .shift-form {
+    flex: 1; /* Formularz rozpycha się na całą dostępną lewą przestrzeń */
     display: flex;
     flex-direction: column;
-    gap: 6px;
-
-    label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    input, select {
-      padding: 8px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      font-size: 0.9rem;
-      outline: none;
-      color: var(--text-main);
-      background-color: white; // <-- Ważne dla selecta
-
-      &:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
-      }
-    }
-  }
-
-  .form-row {
-    display: flex;
     gap: 15px;
 
     .form-group {
-      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-main);
+      }
+
+      input, select {
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 0.9rem;
+        outline: none;
+        color: var(--text-main);
+        background-color: white;
+
+        &:focus {
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+      }
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+
+      .form-group {
+        flex: 1;
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-color);
+
+      button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-weight: 500;
+        border: none;
+        transition: all 0.2s;
+      }
+
+      .btn-cancel {
+        background-color: transparent;
+        color: var(--text-muted);
+
+        &:hover {
+          background-color: var(--bg-color);
+          color: var(--text-main);
+        }
+      }
+
+      .btn-submit {
+        background-color: var(--primary-color);
+        color: white;
+
+        &:hover {
+          background-color: #357abd;
+        }
+      }
     }
   }
 
-  .form-actions {
+  /* PRAWA STRONA: PANEL Z ZADANIAMI (TIMELINE) */
+  .shift-tasks-sidebar {
+    width: 240px;
+    background-color: #f9fafb; /* Lekko szare tło wyróżniające panel */
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 15px;
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid var(--border-color);
+    flex-direction: column;
 
-    button {
-      padding: 8px 16px;
-      border-radius: 4px;
+    h4 {
+      margin: 0 0 15px 0;
       font-size: 0.9rem;
-      cursor: pointer;
-      font-weight: 500;
-      border: none;
-      transition: all 0.2s;
+      color: var(--text-main);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
     }
 
-    .btn-cancel {
-      background-color: transparent;
-      color: var(--text-muted);
+    .tasks-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 320px; // Zapobiega nieskończonemu rośnięciu Modala w dół
+      padding-right: 5px;
 
-      &:hover {
-        background-color: var(--bg-color);
-        color: var(--text-main);
+      .mini-task-card {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-left: 4px solid var(--primary-color); // Domyślny kolor (nadpisywany w TSX)
+        padding: 8px 10px;
+        border-radius: 4px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+
+        .task-title {
+          font-weight: 600;
+          font-size: 0.8rem;
+          color: var(--text-main);
+          line-height: 1.2;
+        }
+
+        .task-time {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          margin-top: 4px;
+        }
+
+        .task-header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+
+          .btn-remove-task {
+            background: none; border: none; font-size: 1.2rem; line-height: 1;
+            cursor: pointer; color: #a0aec0; padding: 0 2px;
+            &:hover { color: #e53e3e; }
+          }
+        }
+      }
+
+      .no-tasks {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-style: italic;
+        text-align: center;
+        padding-top: 20px;
       }
     }
 
-    .btn-submit {
-      background-color: var(--primary-color);
-      color: white;
+    .btn-add-task-trigger {
+      margin-top: 15px; width: 100%; padding: 8px;
+      background-color: transparent; border: 1px dashed var(--border-color);
+      border-radius: 4px; color: var(--primary-color); font-weight: 500;
+      cursor: pointer; transition: background-color 0.2s;
+      &:hover { background-color: rgba(74, 144, 226, 0.05); border-color: var(--primary-color); }
+    }
 
-      &:hover {
-        background-color: #357abd;
+    .mini-task-form {
+      margin-top: 15px; display: flex; flex-direction: column; gap: 8px;
+      background-color: white; padding: 10px; border-radius: 6px;
+      border: 1px solid var(--primary-color);
+
+      .mini-input {
+        width: 100%; padding: 6px 8px; border: 1px solid var(--border-color);
+        border-radius: 4px; font-size: 0.8rem; outline: none;
       }
+
+      .mini-time-row {
+        display: flex; align-items: center; gap: 5px;
+        span { color: var(--text-muted); font-size: 0.8rem; }
+      }
+
+      .mini-form-actions {
+        display: flex; justify-content: flex-end; gap: 5px; margin-top: 4px;
+        button { border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+        .btn-mini-cancel { background: none; color: var(--text-muted); &:hover { color: var(--text-main); } }
+        .btn-mini-add { background-color: var(--primary-color); color: white; &:hover { background-color: #357abd; } }
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    min-width: auto;
+
+    .shift-tasks-sidebar {
+      width: 100%;
     }
   }
 }

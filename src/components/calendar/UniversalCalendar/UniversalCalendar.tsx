@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-// 1. ZAUWAŻ: Dodaliśmy import CalendarProps z biblioteki
 import { Calendar, dateFnsLocalizer, type View, type SlotInfo, type CalendarProps } from 'react-big-calendar';
 import { format, startOfWeek, getDay, isSameMonth, isSameYear, startOfDay, endOfDay, endOfWeek, startOfMonth, endOfMonth, parse } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -15,6 +14,13 @@ import './UniversalCalendar.scss';
 const locales = { pl: pl };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
+export interface CalendarResource {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    department?: string;
+}
+
 export type CalendarEvent = {
     id: string;
     title: string;
@@ -24,10 +30,11 @@ export type CalendarEvent = {
     status?: string;
     color?: string;
     allDay?: boolean;
+    resourceId?: string | number;
+    subTasks?: { id: string; title: string; startTime: string; endTime: string; color?: string }[];
 };
-
-const DnDCalendar = withDragAndDrop<CalendarEvent>(
-    Calendar as React.ComponentType<CalendarProps<CalendarEvent>>
+const DnDCalendar = withDragAndDrop<CalendarEvent, CalendarResource>(
+    Calendar as React.ComponentType<CalendarProps<CalendarEvent, CalendarResource>>
 );
 
 const customFormats = {
@@ -41,21 +48,21 @@ const customFormats = {
     }
 };
 
-// CZYSTY TYPESCRIPT: Odtwarzamy dokładny interfejs, jakiego oczekuje biblioteka dla DnD
 export interface EventInteractionArgs {
     event: CalendarEvent;
     start: Date | string;
     end: Date | string;
     isAllDay?: boolean;
+    resourceId?: string | number;
 }
 
 interface UniversalCalendarProps {
     events: CalendarEvent[];
     backgroundEvents?: CalendarEvent[];
-    onSlotClick: (slotInfo: SlotInfo) => void;
-    onEventClick: (event: CalendarEvent) => void;
+    resources?: CalendarResource[];
 
-    // CZYSTY TYPESCRIPT: Używamy naszego precyzyjnego interfejsu
+    onSlotClick?: (slotInfo: SlotInfo) => void;
+    onEventClick?: (event: CalendarEvent) => void;
     onEventDrop?: (args: EventInteractionArgs) => void;
     onEventResize?: (args: EventInteractionArgs) => void;
 
@@ -92,9 +99,10 @@ const CustomEventBlock = ({ event }: { event: CalendarEvent }) => {
 export const UniversalCalendar = ({
                                       events,
                                       backgroundEvents = [],
+                                      resources,
                                       onSlotClick,
                                       onEventClick,
-                                      onEventDrop,     // Odbieramy propsy DnD z zewnątrz
+                                      onEventDrop,
                                       onEventResize,
                                       defaultView = 'week',
                                       onViewChange,
@@ -157,13 +165,17 @@ export const UniversalCalendar = ({
 
     return (
         <div className={`universal-calendar-wrapper ${customWrapperClass}`}>
-            {/* ZAMIENILIŚMY <Calendar> na <DnDCalendar> */}
             <DnDCalendar
                 localizer={localizer}
                 events={events}
                 backgroundEvents={backgroundEvents}
+                resources={resources}
+                resourceIdAccessor={(resource: CalendarResource) => resource.id}
+                resourceTitleAccessor={(resource: CalendarResource) => `${resource.firstName} ${resource.lastName}`}
+
                 startAccessor={(event: CalendarEvent) => event.start}
                 endAccessor={(event: CalendarEvent) => event.end}
+                allDayAccessor={(event: CalendarEvent) => !!event.allDay}
 
                 eventPropGetter={eventStyleGetter}
                 culture="pl"
@@ -179,14 +191,14 @@ export const UniversalCalendar = ({
                 min={minTime}
                 max={maxTime}
 
-                selectable
+                selectable={!!onSlotClick}
                 onSelectSlot={onSlotClick}
                 onSelectEvent={onEventClick}
 
-                // --- PROPSY DO DRAG AND DROP ---
-                resizable
+                resizable={!!onEventResize}
                 onEventDrop={onEventDrop}
                 onEventResize={onEventResize}
+                draggableAccessor={() => !!onEventDrop}
 
                 components={{
                     event: CustomEventBlock,

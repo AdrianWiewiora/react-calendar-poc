@@ -16,13 +16,12 @@ export const MyCalendar = () => {
     const [calendarView, setCalendarView] = useState<View>('week');
     const [workMode, setWorkMode] = useState<'shifts' | 'tasks'>('shifts');
 
-    // --- STAN DLA MODALA ---
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<{start: Date, end: Date} | null>(null);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null); // <--- ZAPAMIĘTUJEMY KLIKNIĘTE ZADANIE
 
     const myShifts = shifts.filter(shift => shift.employeeId === 'emp-1');
-    const isTaskMode = calendarView === 'week' && workMode === 'tasks';
+    const isTaskMode = (calendarView === 'week' && workMode === 'tasks') || calendarView === 'day';
 
     let displayEvents: CalendarEvent[] = [];
     let displayBackgroundEvents: CalendarEvent[] = [];
@@ -35,7 +34,8 @@ export const MyCalendar = () => {
             end: new Date(shift.endTime),
             status: shift.status,
             eventType: 'shift',
-            allDay: shift.isAllDay // <--- TU
+            allDay: shift.isAllDay,
+            subTasks: shift.subTasks
         }));
 
         displayEvents = myShifts.flatMap(shift =>
@@ -46,7 +46,8 @@ export const MyCalendar = () => {
                 end: new Date(sub.endTime),
                 color: sub.color,
                 eventType: 'task',
-                allDay: sub.isAllDay
+                allDay: sub.isAllDay,
+                subTasks: shift.subTasks
             }))
         );
     } else {
@@ -57,12 +58,13 @@ export const MyCalendar = () => {
             end: new Date(shift.endTime),
             status: shift.status,
             eventType: 'shift',
-            allDay: shift.isAllDay
+            allDay: shift.isAllDay,
+            subTasks: shift.subTasks
         }));
     }
 
     const handleSlotClick = (slotInfo: SlotInfo) => {
-        setSelectedEvent(null); // Czyścimy edycję
+        setSelectedEvent(null);
         setSelectedSlot({
             start: new Date(slotInfo.start),
             end: new Date(slotInfo.end)
@@ -71,19 +73,15 @@ export const MyCalendar = () => {
     };
 
     const handleEventClick = (event: CalendarEvent) => {
-        setSelectedSlot(null); // Czyścimy nowe pole
-        setSelectedEvent(event); // Zapisujemy, co edytujemy
+        setSelectedSlot(null);
+        setSelectedEvent(event);
         setIsModalOpen(true);
     };
 
     const handleSaveForm = (data: ShiftFormData) => {
         if (data.id) {
-            // ==========================================
-            // LOGIKA EDYCJI (Update)
-            // ==========================================
             setShifts(prev => prev.map(shift => {
                 if (isTaskMode) {
-                    // Aktualizacja Podzadania
                     if (shift.subTasks?.some(sub => sub.id === data.id)) {
                         return {
                             ...shift,
@@ -95,7 +93,6 @@ export const MyCalendar = () => {
                         };
                     }
                 } else {
-                    // Aktualizacja Głównej Zmiany
                     if (shift.id === data.id) {
                         return {
                             ...shift,
@@ -103,16 +100,14 @@ export const MyCalendar = () => {
                             startTime: data.startTime,
                             endTime: data.endTime,
                             status: data.status || 'planned',
-                            isAllDay: data.isAllDay
+                            isAllDay: data.isAllDay,
+                            subTasks: data.subTasks || shift.subTasks
                         };
                     }
                 }
                 return shift;
             }));
         } else {
-            // ==========================================
-            // LOGIKA TWORZENIA (Create) - zostaje jak była!
-            // ==========================================
             if (isTaskMode) {
                 setShifts(prev => prev.map(shift => {
                     const shiftStart = new Date(shift.startTime);
@@ -144,7 +139,7 @@ export const MyCalendar = () => {
                     startTime: data.startTime,
                     endTime: data.endTime,
                     status: data.status || 'planned',
-                    subTasks: [],
+                    subTasks: data.subTasks || [],
                     isAllDay: data.isAllDay
                 };
                 setShifts(prev => [...prev, newShift]);
@@ -160,7 +155,6 @@ export const MyCalendar = () => {
         setSelectedEvent(null);
     };
 
-// --- LOGIKA DRAG AND DROP (Rozbudowana o Kopiowanie!) ---
     const handleEventDrop = ({ event, start, end }: EventInteractionArgs) => {
         const isCopy = isCtrlPressed.current; // Sprawdzamy, czy wciśnięto Ctrl w momencie puszczenia
 
@@ -171,9 +165,6 @@ export const MyCalendar = () => {
 
         setShifts(prevShifts => {
             if (isCopy) {
-                // ==========================================
-                // TRYB KOPIOWANIA (Tworzymy całkiem nowe obiekty)
-                // ==========================================
                 if (isTaskMode) {
                     return prevShifts.map(shift => {
                         const shiftStart = new Date(shift.startTime);
@@ -205,15 +196,12 @@ export const MyCalendar = () => {
                         startTime: newStart,
                         endTime: newEnd,
                         status: (event.status as 'planned' | 'in-progress' | 'completed' | 'absent') || 'planned',
-                        subTasks: [], // Na razie bezpiecznie nie kopiujemy "wnętrzności" zadania
+                        subTasks: event.subTasks || [],
                         isAllDay: event.allDay
                     };
                     return [...prevShifts, newShift];
                 }
             } else {
-                // ==========================================
-                // TRYB PRZENOSZENIA (Stara logika, tylko przesunięcie)
-                // ==========================================
                 return prevShifts.map(shift => {
                     if (isTaskMode) {
                         if (shift.subTasks) {
